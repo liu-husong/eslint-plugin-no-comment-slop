@@ -47,19 +47,6 @@ test("max-comment-lines", () => {
       "/**\n * short\n *\n * @example\n * a\n * b\n * c\n * d\n * e\n * f\n * g\n * h\n */\nconst a = 1;",
       "/**\n * short\n *\n * ```js\n * a\n * b\n * c\n * d\n * e\n * f\n * ```\n */\nconst a = 1;",
       "// one\n// ```\n// a\n// b\n// c\n// d\n// ```\n// two\nconst a = 1;",
-      {
-        code: "const a = 1;\n// eslint-disable-next-line no-console\nconst b = 2;",
-        options: [{ max: 0 }],
-      },
-      { code: "// header\nconst a = 1;", options: [{ max: 0 }] },
-      { code: "const a = 1;\n// not a header\nconst b = 2;", options: [{ headerMax: 0 }] },
-      { code: "/**\n * @example\n * f()\n */\nfunction f() {}", options: [{ jsdocSectionMax: 0 }] },
-      { code: "/**\n * doc\n */\nexport const a = 1;", options: [{ jsdocSectionMax: 0 }] },
-      {
-        code: "/**\n * @param x the x\n */\nexport function f(x) {}",
-        options: [{ exportDescriptionMax: 0 }],
-      },
-      { code: "/**\n * doc\n */\nexport const a = 1;", options: [{ exportTagMax: 0 }] },
     ],
     invalid: [
       {

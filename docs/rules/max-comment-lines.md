@@ -12,8 +12,6 @@ A run of `//` lines on consecutive lines counts as one comment. JSDoc blocks get
 
 JSDoc above an `export` gets more room: public API earns real documentation. Its description may run to `exportDescriptionMax` lines and each `@tag` section to `exportTagMax`. Blank lines between the comment and the export do not break the association; code, another comment, or being the file header does.
 
-A budget of `0` reports every comment of that kind, for example `{ exportTagMax: 0 }` to keep tags out of exported JSDoc.
-
 The default of 3 is aggressive on purpose. In a repo that mandates dense explanatory comments, raise `max` rather than fighting the rule.
 
 `@example` sections and fenced code blocks (` ``` `) never count, whatever their length.
@@ -46,5 +44,3 @@ const value = load();
 | `jsdocSectionMax`      | integer | `5`     | Line budget per JSDoc section                      |
 | `exportDescriptionMax` | integer | `10`    | Description budget for JSDoc on an export          |
 | `exportTagMax`         | integer | `7`     | Budget per `@tag` section for JSDoc on an export   |
-
-Every budget accepts `0` or more.

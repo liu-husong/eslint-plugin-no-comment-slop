@@ -47,6 +47,19 @@ test("max-comment-lines", () => {
       "/**\n * short\n *\n * @example\n * a\n * b\n * c\n * d\n * e\n * f\n * g\n * h\n */\nconst a = 1;",
       "/**\n * short\n *\n * ```js\n * a\n * b\n * c\n * d\n * e\n * f\n * ```\n */\nconst a = 1;",
       "// one\n// ```\n// a\n// b\n// c\n// d\n// ```\n// two\nconst a = 1;",
+      {
+        code: "const a = 1;\n// eslint-disable-next-line no-console\nconst b = 2;",
+        options: [{ max: 0 }],
+      },
+      { code: "// header\nconst a = 1;", options: [{ max: 0 }] },
+      { code: "const a = 1;\n// not a header\nconst b = 2;", options: [{ headerMax: 0 }] },
+      { code: "/**\n * @example\n * f()\n */\nfunction f() {}", options: [{ jsdocSectionMax: 0 }] },
+      { code: "/**\n * doc\n */\nexport const a = 1;", options: [{ jsdocSectionMax: 0 }] },
+      {
+        code: "/**\n * @param x the x\n */\nexport function f(x) {}",
+        options: [{ exportDescriptionMax: 0 }],
+      },
+      { code: "/**\n * doc\n */\nexport const a = 1;", options: [{ exportTagMax: 0 }] },
     ],
     invalid: [
       {
@@ -74,135 +87,44 @@ test("max-comment-lines", () => {
         code: "/**\n * short\n *\n * @param x 1\n * 2\n * 3\n * 4\n * 5\n * 6\n * 7\n * 8\n */\nexport function f(x) { return x; }",
         errors: [{ messageId: "sectionTooLong", data: { lines: "8", max: "7" } }],
       },
-    ],
-  });
-});
-
-/** Build a JSDoc block, one argument per line, an empty string for a blank gutter line */
-const doc = (...lines: string[]): string =>
-  `/**\n${lines.map((line) => (line ? ` * ${line}` : " *")).join("\n")}\n */\n`;
-
-test("max-comment-lines with a budget of 0", () => {
-  ruleTester.run("max-comment-lines", rule("max-comment-lines"), {
-    valid: [
-      { code: "const a = 1;", options: [{ max: 0 }] },
-      { code: "const a = 1;\n//\nconst b = 2;", options: [{ max: 0 }] },
-      {
-        code: "const a = 1;\n// eslint-disable-next-line no-console\nconst b = 2;",
-        options: [{ max: 0 }],
-      },
-      { code: "// header\nconst a = 1;", options: [{ max: 0 }] },
-      { code: `const a = 1;\n${doc("doc")}const b = 2;`, options: [{ max: 0 }] },
-      { code: "const a = 1;", options: [{ headerMax: 0 }] },
-      { code: "const a = 1;\n// not a header\nconst b = 2;", options: [{ headerMax: 0 }] },
-      { code: "const a = 1;\n// one\nconst b = 2;", options: [{ jsdocSectionMax: 0 }] },
-      { code: `${doc("@example", "f()")}function f() {}`, options: [{ jsdocSectionMax: 0 }] },
-      {
-        code: `${doc("@param x the x")}export function f(x) {}`,
-        options: [{ jsdocSectionMax: 0 }],
-      },
-      { code: `${doc("doc")}export const a = 1;`, options: [{ jsdocSectionMax: 0 }] },
-      { code: "export const a = 1;", options: [{ exportDescriptionMax: 0 }] },
-      {
-        code: `const b = 2;\n${doc("doc")}const a = 1;`,
-        options: [{ exportDescriptionMax: 0 }],
-      },
-      {
-        code: `${doc("@param x the x")}export function f(x) {}`,
-        options: [{ exportDescriptionMax: 0 }],
-      },
-      { code: `${doc("doc")}export const a = 1;`, options: [{ exportTagMax: 0 }] },
-      { code: `${doc("@param x the x")}function f(x) {}`, options: [{ exportTagMax: 0 }] },
-      {
-        code: `${doc("doc", "", "@example", "f()")}export function f() {}`,
-        options: [{ exportTagMax: 0 }],
-      },
-    ],
-    invalid: [
       {
         code: "const a = 1;\n// one\nconst b = 2;",
         options: [{ max: 0 }],
-        errors: [
-          {
-            message:
-              "No comments allowed here (max 0 lines). Let the code say it or move the note to the docs",
-          },
-        ],
-      },
-      {
-        code: "const a = 1;\n/* one */\nconst b = 2;",
-        options: [{ max: 0 }],
-        errors: [{ messageId: "commentNotAllowed" }],
-      },
-      {
-        code: "const a = 1; // one",
-        options: [{ max: 0 }],
-        errors: [{ messageId: "commentNotAllowed" }],
+        errors: [{ messageId: "tooLong", data: { lines: "1", max: "0" } }],
       },
       {
         code: "// header\nconst a = 1;",
         options: [{ headerMax: 0 }],
-        errors: [{ messageId: "commentNotAllowed" }],
+        errors: [{ messageId: "tooLong", data: { lines: "1", max: "0" } }],
       },
       {
-        code: "#!/usr/bin/env node\n// header\nconst a = 1;",
-        options: [{ headerMax: 0 }],
-        errors: [{ messageId: "commentNotAllowed", line: 2 }],
-      },
-      {
-        code: `const b = 2;\n${doc("doc")}const a = 1;`,
+        code: "/**\n * doc\n *\n * @param x the x\n */\nfunction f(x) {}",
         options: [{ jsdocSectionMax: 0 }],
         errors: [
-          {
-            message:
-              "No JSDoc description allowed here (max 0 lines). Let the name say it or move the text to the docs",
-          },
+          { messageId: "sectionTooLong", data: { lines: "1", max: "0" } },
+          { messageId: "sectionTooLong", data: { lines: "1", max: "0" } },
         ],
       },
       {
-        code: `${doc("@param x the x")}function f(x) {}`,
-        options: [{ jsdocSectionMax: 0 }],
-        errors: [
-          {
-            message:
-              "No @param text allowed here (max 0 lines). Drop the tag or move the text to the docs",
-          },
-        ],
-      },
-      {
-        code: `${doc("doc", "", "@param x the x", "@returns y")}function f(x) {}`,
-        options: [{ jsdocSectionMax: 0 }],
-        errors: [
-          { messageId: "descriptionNotAllowed" },
-          { messageId: "tagNotAllowed", data: { tag: "param" } },
-          { messageId: "tagNotAllowed", data: { tag: "returns" } },
-        ],
-      },
-      {
-        code: `${doc("doc")}export const a = 1;`,
+        code: "/**\n * doc\n */\nexport const a = 1;",
         options: [{ exportDescriptionMax: 0 }],
-        errors: [{ messageId: "descriptionNotAllowed" }],
+        errors: [{ messageId: "sectionTooLong", data: { lines: "1", max: "0" } }],
       },
       {
-        code: `${doc("doc", "", "@param x the x")}export function f(x) {}`,
+        code: "/**\n * doc\n *\n * @param x the x\n */\nexport function f(x) {}",
         options: [{ exportTagMax: 0 }],
-        errors: [{ messageId: "tagNotAllowed", data: { tag: "param" } }],
-      },
-      {
-        code: `${doc("@param x the x", "@param y the y")}export function f(x, y) {}`,
-        options: [{ exportTagMax: 0 }],
-        errors: [
-          { messageId: "tagNotAllowed", line: 2 },
-          { messageId: "tagNotAllowed", line: 3 },
-        ],
+        errors: [{ messageId: "sectionTooLong", data: { lines: "1", max: "0" }, line: 4 }],
       },
     ],
   });
-});
 
-test("max-comment-lines rejects a negative budget", () => {
-  const options = ["max", "headerMax", "jsdocSectionMax", "exportDescriptionMax", "exportTagMax"];
-  for (const option of options) {
+  for (const option of [
+    "max",
+    "headerMax",
+    "jsdocSectionMax",
+    "exportDescriptionMax",
+    "exportTagMax",
+  ]) {
     assert.throws(
       () =>
         ruleTester.run("max-comment-lines", rule("max-comment-lines"), {

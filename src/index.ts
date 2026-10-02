@@ -292,12 +292,6 @@ const maxCommentLines: Rule.RuleModule = {
         "Comment is {{lines}} lines (max {{max}}). If it needs this much explaining, put it in the docs and leave a link",
       sectionTooLong:
         "This JSDoc section is {{lines}} lines (max {{max}}). Break it up with a blank line or move it to the docs",
-      commentNotAllowed:
-        "No comments allowed here (max 0 lines). Let the code say it or move the note to the docs",
-      descriptionNotAllowed:
-        "No JSDoc description allowed here (max 0 lines). Let the name say it or move the text to the docs",
-      tagNotAllowed:
-        "No @{{tag}} text allowed here (max 0 lines). Drop the tag or move the text to the docs",
     },
   },
   create(context) {
@@ -332,23 +326,17 @@ const maxCommentLines: Rule.RuleModule = {
             const lines = withoutFencedCode(commentLines(comment));
             for (const section of splitSections(lines)) {
               if (isExampleSection(section)) continue;
-              const tag = /^@(\w+)/.exec(section[0]!.text)?.[1];
+              const isTag = /^@\w/.test(section[0]!.text);
               const sectionMax = documentsExport
-                ? tag
+                ? isTag
                   ? exportTagMax
                   : exportDescriptionMax
                 : jsdocSectionMax;
               if (section.length > sectionMax) {
                 context.report({
                   loc: sectionLoc(section),
-                  ...(sectionMax > 0
-                    ? {
-                        messageId: "sectionTooLong",
-                        data: { lines: String(section.length), max: String(sectionMax) },
-                      }
-                    : tag
-                      ? { messageId: "tagNotAllowed", data: { tag } }
-                      : { messageId: "descriptionNotAllowed" }),
+                  messageId: "sectionTooLong",
+                  data: { lines: String(section.length), max: String(sectionMax) },
                 });
               }
             }
@@ -361,12 +349,8 @@ const maxCommentLines: Rule.RuleModule = {
           if (lines.length > limit) {
             context.report({
               loc: blockLoc(block),
-              ...(limit === 0
-                ? { messageId: "commentNotAllowed" }
-                : {
-                    messageId: "tooLong",
-                    data: { lines: String(lines.length), max: String(limit) },
-                  }),
+              messageId: "tooLong",
+              data: { lines: String(lines.length), max: String(limit) },
             });
           }
         }
@@ -1120,7 +1104,7 @@ const requireMemberDocs = {
       {
         type: "object",
         properties: {
-          minDocumented: { type: "integer", minimum: 0 },
+          minDocumented: { type: "integer", minimum: 1 },
           minRatio: { type: "number", minimum: 0, maximum: 1 },
         },
         additionalProperties: false,

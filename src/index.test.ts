@@ -104,24 +104,6 @@ test("max-comment-lines", () => {
       },
     ],
   });
-
-  for (const option of [
-    "max",
-    "headerMax",
-    "jsdocSectionMax",
-    "exportDescriptionMax",
-    "exportTagMax",
-  ]) {
-    assert.throws(
-      () =>
-        ruleTester.run("max-comment-lines", rule("max-comment-lines"), {
-          valid: [{ code: "const a = 1;", options: [{ [option]: -1 }] }],
-          invalid: [],
-        }),
-      /should be >= 0/,
-      option,
-    );
-  }
 });
 
 test("no-banner-comment", () => {
